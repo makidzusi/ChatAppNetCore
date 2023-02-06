@@ -19,6 +19,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 builder.Services.AddTransient<AuthService>();
 builder.Services.AddTransient<UserService>();
+builder.Services.AddTransient<TokenService>();
 
 builder.Services.AddDbContext<ChatAppContext>(options =>
 {

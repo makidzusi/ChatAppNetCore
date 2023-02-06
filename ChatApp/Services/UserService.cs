@@ -24,5 +24,11 @@ namespace ChatApp.Services
             await _context.SaveChangesAsync();
             return result.Entity;
         }
+
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
+            return user;
+        }
     }
 }
