@@ -6,17 +6,17 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using ChatApp.Config;
+using ChatApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var people = new List<Person>
- {
-    new Person("tom@gmail.com", "11111"),
-    new Person("bob@gmail.com", "55555"),
-    new Person("sam@gmail.com", "22222")
-};
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+builder.Services.AddTransient<AuthService>();
+
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -65,50 +65,12 @@ builder.Services.AddCors(options => options.AddPolicy("CorsPolicy",
 var app = builder.Build();
 
 
-
+app.UseHttpsRedirection();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseCors("CorsPolicy");
 
 app.MapHub<ChatHub>("/chat");
-
-app.MapPost("/login", (Person loginModel) =>
-{
-    // находим пользователя 
-    Person? person = people.FirstOrDefault(p => p.Email == loginModel.Email && p.Password == loginModel.Password);
-    // если пользователь не найден, отправляем статусный код 401
-    if (person is null) return Results.Unauthorized();
-
-    var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, person.Email) };
-    // создаем JWT-токен
-    var jwt = new JwtSecurityToken(
-            issuer: AuthOptions.ISSUER,
-            audience: AuthOptions.AUDIENCE,
-            claims: claims,
-            expires: DateTime.UtcNow.Add(TimeSpan.FromDays(14)),
-            signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-    var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
-    // формируем ответ
-    var response = new
-    {
-        access_token = encodedJwt,
-        username = person.Email
-    };
-
-    return Results.Json(response);
-});
-
+app.MapControllers();
 
 app.Run();
-
-public class AuthOptions
-{
-    public const string ISSUER = "MyAuthServer"; // издатель токена
-    public const string AUDIENCE = "MyAuthClient"; // потребитель токена
-    const string KEY = "mysupersecret_secretkey!123";   // ключ для шифрации
-    public static SymmetricSecurityKey GetSymmetricSecurityKey() =>
-        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(KEY));
-}
-
-record class Person(string Email, string Password);
