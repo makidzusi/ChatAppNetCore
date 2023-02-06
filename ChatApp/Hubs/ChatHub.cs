@@ -11,8 +11,6 @@ namespace ChatApp.Hubs
         {
             try
             {
-                // получение текущего пользователя, который отправил сообщение
-                //var userName = Context.UserIdentifier;
                 if (Context.UserIdentifier is string userName)
                 {
                     await Clients.Users(to, userName).SendAsync("Receive", message, userName);
@@ -27,6 +25,7 @@ namespace ChatApp.Hubs
 
         public override async Task OnConnectedAsync()
         {
+            Console.Write("connected");
             await Clients.All.SendAsync("Notify", $"Приветствуем {Context.UserIdentifier}");
             await base.OnConnectedAsync();
         }

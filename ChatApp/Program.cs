@@ -10,6 +10,8 @@ using ChatApp.Config;
 using ChatApp.Services;
 using Microsoft.EntityFrameworkCore;
 using ChatApp.DataAccess;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,16 +22,41 @@ builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 builder.Services.AddTransient<AuthService>();
 builder.Services.AddTransient<UserService>();
 builder.Services.AddTransient<TokenService>();
+builder.Services.AddTransient<ChatService>();
 
 builder.Services.AddDbContext<ChatAppContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("ChatAppContext"));
-}); 
+});
 
-//builder.Services.AddDbContext<ChatAppContext>(options =>
-//{
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-//});
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "ChatApp API", Version = "v1" });
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "ChatApp",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type=ReferenceType.SecurityScheme,
+                    Id="Bearer"
+                }
+            },
+            new string[]{}
+        }
+    });
+});
+
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -66,24 +93,40 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddSignalR();
 
-builder.Services.AddCors(options => options.AddPolicy("CorsPolicy",
-        builder =>
-        {
-            builder.AllowAnyHeader()
-                   .AllowAnyMethod()
-                   .SetIsOriginAllowed((host) => true)
-                   .AllowCredentials();
-        }));
 
 var app = builder.Build();
 
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+app.UseCors(builder =>
+{
+    builder.WithOrigins("http://127.0.0.1:5173")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+});
+
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
-app.UseCors("CorsPolicy");
 
-app.MapHub<ChatHub>("/chat");
-app.MapControllers();
+
+
+app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<ChatHub>("/chat");
+    endpoints.MapControllers();
+});
+
 
 app.Run();
