@@ -8,6 +8,8 @@ using System.Security.Claims;
 using System.Text;
 using ChatApp.Config;
 using ChatApp.Services;
+using Microsoft.EntityFrameworkCore;
+using ChatApp.DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +18,17 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 builder.Services.AddTransient<AuthService>();
+builder.Services.AddTransient<UserService>();
 
+builder.Services.AddDbContext<ChatAppContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("ChatAppContext"));
+}); 
+
+//builder.Services.AddDbContext<ChatAppContext>(options =>
+//{
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+//});
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

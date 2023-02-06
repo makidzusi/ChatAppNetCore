@@ -28,5 +28,16 @@ namespace ChatApp.Contollers
             return Ok(result);
 
         }
+        [HttpPost]
+        [Route("register")]
+        public async Task<IActionResult> Register(RegisterDTO registerDTO)
+        {
+            var result = await _authService.RegisterAsync(registerDTO);
+            if(result== null)
+            {
+                return StatusCode(500, "User already exists");
+            }
+            return Ok(result);
+        }
     }
 }

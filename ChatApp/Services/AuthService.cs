@@ -4,13 +4,25 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System;
 using ChatApp.Contracts;
-
+using ChatApp.DataAccess.Entities;
 
 namespace ChatApp.Services
 {
 
     public class AuthService
     {
+        private readonly UserService _userSerivce;
+        public AuthService(UserService userSerivce)
+        {
+            _userSerivce = userSerivce;
+        }
+
+        public async Task<User?> RegisterAsync(RegisterDTO registerDTO)
+        {
+            var result = await _userSerivce.CreateUserAsync(registerDTO);
+
+            return result;
+        }
         public async Task<LoginResponse?> LoginAsync(LoginDTO loginModel)
 
         {
