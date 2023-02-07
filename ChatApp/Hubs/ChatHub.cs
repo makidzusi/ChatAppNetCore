@@ -15,7 +15,7 @@ namespace ChatApp.Hubs
             {
                 if (Context.UserIdentifier is string userName)
                 {
-                    await Clients.User(userName).SendAsync("Receive", message, userName);
+                    await Clients.User(to).SendAsync("Receive", message, userName);
                     await Clients.Caller.SendAsync("Receive", message, userName);
                 }
             }
