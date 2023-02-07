@@ -30,5 +30,11 @@ namespace ChatApp.Services
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
             return user;
         }
+        
+        public async Task<List<User>> GetUsersListAsync()
+        {
+            var users = await _context.Users.ToListAsync();
+            return users;
+        }
     }
 }
