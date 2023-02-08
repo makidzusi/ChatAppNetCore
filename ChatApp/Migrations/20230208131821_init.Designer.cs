@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChatApp.Migrations
 {
     [DbContext(typeof(ChatAppContext))]
-    [Migration("20230206113008_init2")]
-    partial class init2
+    [Migration("20230208131821_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,21 +26,26 @@ namespace ChatApp.Migrations
 
             modelBuilder.Entity("ChatApp.DataAccess.Entities.Message", b =>
                 {
-                    b.Property<int>("SenderId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseSerialColumn(b.Property<int>("Id"));
 
                     b.Property<int>("RecipientId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Id")
+                    b.Property<int>("SenderId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Text")
                         .HasColumnType("text");
 
-                    b.HasKey("SenderId", "RecipientId");
+                    b.HasKey("Id");
 
                     b.HasIndex("RecipientId");
+
+                    b.HasIndex("SenderId");
 
                     b.ToTable("Messages");
                 });

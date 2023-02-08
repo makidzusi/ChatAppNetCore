@@ -10,6 +10,7 @@ namespace ChatApp.DataAccess.Entities
         
         public int SenderId { get; set; }
         public User? Sender { get; set; }
+      
         public int RecipientId { get; set; }
         public User? Recipient { get; set; }
        
@@ -19,8 +20,8 @@ namespace ChatApp.DataAccess.Entities
     {
         public void Configure(EntityTypeBuilder<Message> builder)
         {
-            
-            builder.HasKey(x => new { x.SenderId, x.RecipientId});
+            builder.HasKey(x => x.Id);
+            builder.Property(x => x.Id).UseSerialColumn();
             builder.HasOne(x => x.Sender).WithMany(x => x.SendedMessages);
             builder.HasOne(x =>x.Recipient).WithMany(x =>x.ReceivedMessages);
 

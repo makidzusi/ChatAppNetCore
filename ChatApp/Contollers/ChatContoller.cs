@@ -1,4 +1,5 @@
-﻿using ChatApp.Services;
+﻿using ChatApp.Contracts;
+using ChatApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,11 +17,12 @@ namespace ChatApp.Contollers
         }
 
 
-        [HttpPost]
-        [Route("send")]
-        public async Task<IActionResult> SendMessageAsync()
+        [HttpGet]
+        [Route("messages")]
+       public async Task<IActionResult> GetMessagesAsync(GetMessagesReqDTO _data)
         {
-            return Ok();
+            var result = await _chatService.getAllMessagesAsync(_data.recipientId, _data.senderId);
+            return Ok(result);
         }
     }
 }
