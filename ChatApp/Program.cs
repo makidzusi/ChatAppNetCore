@@ -12,8 +12,17 @@ using Microsoft.EntityFrameworkCore;
 using ChatApp.DataAccess;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Builder;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

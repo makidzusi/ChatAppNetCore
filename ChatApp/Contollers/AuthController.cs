@@ -10,21 +10,28 @@ namespace ChatApp.Contollers
     public class AuthController : ControllerBase
     {
         private readonly AuthService _authService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(AuthService authService)
+        public AuthController(AuthService authService, ILogger<AuthController> logger)
         {
             _authService = authService;
+            _logger = logger;
         }
 
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> Login(LoginDTO loginData)
         {
+            _logger.LogInformation("User with credentials : {@loginDAta} trying to login", loginData);
+
             var result = await _authService.LoginAsync(loginData);
             if(result== null)
             {
+                _logger.LogInformation("User with credentials : {@loginDAta} failed auth", loginData);
                 return Unauthorized("Invalid login or password");
             }
+
+            _logger.LogInformation("User with credentials : {@loginDAta} logged in", loginData);
             return Ok(result);
 
         }
