@@ -31,9 +31,9 @@ namespace ChatApp.Services
             return user;
         }
         
-        public async Task<List<User>> GetUsersListAsync()
+        public async Task<List<User>> GetUsersListAsync(string email)
         {
-            var users = await _context.Users.ToListAsync();
+            var users = await _context.Users.Where(x => x.Email != email).ToListAsync();
             return users;
         }
     }

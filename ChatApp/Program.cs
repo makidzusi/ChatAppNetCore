@@ -13,6 +13,8 @@ using ChatApp.DataAccess;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Builder;
 using Serilog;
+using Microsoft.AspNetCore.Authorization;
+using ChatApp.Policies.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +28,7 @@ builder.Logging.AddSerilog(logger);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddTransient<IAuthorizationHandler, EmailHandler>();
 
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 builder.Services.AddTransient<AuthService>();
@@ -67,7 +70,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(x => x.AddPolicy("Email", p => p.Requirements.Add(new EmailReqirement("stass@gmail.com"))));
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {

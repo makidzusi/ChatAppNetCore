@@ -1,7 +1,11 @@
 ﻿using ChatApp.Contracts;
 using ChatApp.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ChatApp.Contollers
 {
@@ -45,6 +49,20 @@ namespace ChatApp.Contollers
                 return StatusCode(500, "User already exists");
             }
             return Ok(result);
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "Email")]
+        [Route("getme")]
+        public async Task<IActionResult> GetMeAsync()
+        {
+            JsonSerializerOptions options = new()
+            {
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                WriteIndented = true
+            };
+            var json = JsonSerializer.Serialize(HttpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value, options);
+            return Ok(json);
         }
     }
 }
